@@ -1,0 +1,26 @@
+name: Astar Lab Cloudflare preview smoke
+on:
+  pull_request:
+    paths:
+      - 'astar-lab/**'
+      - '.github/workflows/astar-lab-preview-smoke.yml'
+  workflow_dispatch:
+jobs:
+  preview-http:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Verify public preview HTML
+        run: |
+          set -euo pipefail
+          URL="https://feat-astar-lab-pilot.jianwenxin-astar-lab.pages.dev"
+          curl --fail --location --silent --show-error --retry 12 --retry-delay 5 --retry-all-errors "$URL/" -o /tmp/astar-index.html
+          grep -Fq 'A* Pathfinding Lab' /tmp/astar-index.html
+          grep -Fq '开始搜索' /tmp/astar-index.html
+      - name: Verify JavaScript algorithm module is served
+        run: |
+          set -euo pipefail
+          URL="https://feat-astar-lab-pilot.jianwenxin-astar-lab.pages.dev"
+          curl --fail --location --silent --show-error --retry 12 --retry-delay 5 --retry-all-errors "$URL/astar.mjs" -o /tmp/astar.mjs
+          grep -Fq 'export function solve' /tmp/astar.mjs
